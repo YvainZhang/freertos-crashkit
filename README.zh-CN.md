@@ -23,12 +23,12 @@ make sanitize
 make verify  # 同时构建主机静态库、合成演示并检查文档链接
 python3 scripts/fetch-freertos.py
 docker build -f scripts/Dockerfile.rv32 -t freertos-crashkit-rv32:bookworm .
-docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges --cpus 2 --memory 512m -v "$PWD:/work" -w /work freertos-crashkit-rv32:bookworm python3 scripts/build-rv32.py
+docker run --rm --user "$(id -u):$(id -g)" --network none --cap-drop ALL --security-opt no-new-privileges --cpus 2 --memory 512m -v "$PWD:/work" -w /work freertos-crashkit-rv32:bookworm python3 scripts/build-rv32.py
 make qemu-test
 python3 tools/analyze.py evidence/qemu-rv32/1.bin --elf build/rv32/1/firmware.elf --json build/report.json --html build/report.html
 ```
 
-下载工具校验锁定的官方归档；已有归档可用`--archive <path>`复用。构建不修改已有项目、容器或FreeRTOS源码。工具容器只挂载本项目，无网络；不要在共享生产环境注入故障。
+下载工具校验锁定的官方归档；已有归档可用`--archive <path>`复用。构建不修改已有项目、容器或FreeRTOS源码。工具容器以当前用户UID/GID运行，移除capabilities后仍能写入自己拥有的挂载目录，避免Linux runner的root无权限问题。已有生成文件也需由该用户可写。工具容器只挂载本项目，无网络；不要在共享生产环境注入故障。
 
 ## 文档与边界
 

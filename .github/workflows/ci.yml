@@ -42,6 +42,6 @@ jobs:
       - name: Cross-toolchain
         run: docker build -f scripts/Dockerfile.rv32 -t freertos-crashkit-rv32:bookworm .
       - name: Build reference firmware
-        run: docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges --cpus 2 --memory 512m -v "$PWD:/work" -w /work freertos-crashkit-rv32:bookworm python3 scripts/build-rv32.py
+        run: docker run --rm --user "$(id -u):$(id -g)" --network none --cap-drop ALL --security-opt no-new-privileges --cpus 2 --memory 512m -v "$PWD:/work" -w /work freertos-crashkit-rv32:bookworm python3 scripts/build-rv32.py
       - name: Fault capture and ELF matching
         run: make qemu-test

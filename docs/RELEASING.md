@@ -43,6 +43,8 @@ pass on that exact commit. The workflow uses a pinned checkout commit, read-only
 contents permission and ordinary pull_request events; it does not publish releases
 or consume deployment secrets. See GitHub's [secure-use guidance](https://docs.github.com/en/actions/reference/security/secure-use)
 and the pinned [checkout release](https://github.com/actions/checkout/releases/tag/v7.0.1).
+The build container runs with the checkout owner's UID/GID and no capabilities,
+so write access follows normal Unix ownership even on a Linux runner.
 The workflow targets GitHub-hosted Ubuntu 24.04 runners; checkout uses Node 24
 and needs runner v2.327.1+ if adapted to self-hosting, per its [official README](https://github.com/actions/checkout/blob/v7.0.1/README.md).
 CI configuration supplied locally is not remote CI evidence.

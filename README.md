@@ -34,7 +34,7 @@ Install Docker and `qemu-system-riscv32` on the host, then run from the repo roo
 ```sh
 python3 scripts/fetch-freertos.py
 docker build -f scripts/Dockerfile.rv32 -t freertos-crashkit-rv32:bookworm .
-docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges --cpus 2 --memory 512m -v "$PWD:/work" -w /work freertos-crashkit-rv32:bookworm python3 scripts/build-rv32.py
+docker run --rm --user "$(id -u):$(id -g)" --network none --cap-drop ALL --security-opt no-new-privileges --cpus 2 --memory 512m -v "$PWD:/work" -w /work freertos-crashkit-rv32:bookworm python3 scripts/build-rv32.py
 make qemu-test
 python3 tools/analyze.py evidence/qemu-rv32/1.bin --elf build/rv32/1/firmware.elf --json build/report.json --html build/report.html
 ```
@@ -44,7 +44,9 @@ Alternatively install the Debian cross-toolchain listed in
 The fetcher verifies the pinned official archive; `--archive path` supports
 offline reuse. QEMU runs without a NIC. Tests check timer/ecall delegation, fault
 PC/cause, original registers, bad stack pointer, nested capture abort and wrong
-ELF rejection. Timeouts and arbitrary crashes fail the test.
+ELF rejection. Timeouts and arbitrary crashes fail the test. The container uses
+the checkout owner's UID/GID so it can write the mounted tree without root
+capabilities on Linux; keep generated files writable by that owner.
 
 ## What is included
 
