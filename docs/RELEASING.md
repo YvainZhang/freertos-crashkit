@@ -42,7 +42,9 @@ After pushing reviewed source, require the host and RV32 GitHub Actions jobs to
 pass on that exact commit. The workflow uses a pinned checkout commit, read-only
 contents permission and ordinary pull_request events; it does not publish releases
 or consume deployment secrets. See GitHub's [secure-use guidance](https://docs.github.com/en/actions/reference/security/secure-use)
-and the pinned [checkout release](https://github.com/actions/checkout/releases/tag/v4.2.2).
+and the pinned [checkout release](https://github.com/actions/checkout/releases/tag/v7.0.1).
+The workflow targets GitHub-hosted Ubuntu 24.04 runners; checkout uses Node 24
+and needs runner v2.327.1+ if adapted to self-hosting, per its [official README](https://github.com/actions/checkout/blob/v7.0.1/README.md).
 CI configuration supplied locally is not remote CI evidence.
 
 Then check changelog/version, third-party notices, the real repository's reporting

@@ -5,6 +5,7 @@ from pathlib import Path
 import tarfile
 import tempfile
 import unittest
+import json
 
 ROOT = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location('release', ROOT / 'scripts/release.py')
@@ -28,7 +29,7 @@ class ReleaseTests(unittest.TestCase):
                 release.unpack(archive, directory / 'source')
 
     def test_traversal_link_duplicate_and_bad_hash(self):
-        for variant in ('traversal', 'link', 'duplicate', 'hash'):
+        for variant in ('traversal', 'link', 'duplicate', 'hash', 'schema', 'version'):
             with self.subTest(variant=variant), tempfile.TemporaryDirectory() as temporary:
                 directory = Path(temporary)
                 good, _ = release.package(ROOT, directory)
@@ -40,6 +41,14 @@ class ReleaseTests(unittest.TestCase):
                         if variant == 'hash' and member.name.endswith('/VERSION'):
                             data = b'0.2.0\n'
                             member.size = len(data)
+                        if member.name.endswith('/MANIFEST.json') and variant in ('schema', 'version'):
+                            manifest = json.loads(data)
+                            if variant == 'schema':
+                                manifest = []
+                            else:
+                                manifest['version'] = '0.2.0'
+                            data = json.dumps(manifest).encode('utf-8')
+                            member.size = len(data)
                         output.addfile(member, io.BytesIO(data))
                     entry = tarfile.TarInfo('freertos-crashkit-0.1.0/../../escaped')
                     if variant == 'link':
@@ -48,7 +57,7 @@ class ReleaseTests(unittest.TestCase):
                         entry.linkname = '/etc/passwd'
                     if variant == 'duplicate':
                         entry = members[0]
-                    if variant != 'hash':
+                    if variant not in ('hash', 'schema', 'version'):
                         output.addfile(entry, io.BytesIO(b'\0' * entry.size))
                 with self.assertRaises(ValueError):
                     release.unpack(bad, directory / 'source')

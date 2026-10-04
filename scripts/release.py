@@ -54,15 +54,18 @@ def payload(root):
     return result
 
 
-def version(root):
-    value = (root / 'VERSION').read_text(encoding='utf-8').strip()
+def validate_version(value, header):
     require(re.fullmatch(r'[0-9]+\.[0-9]+\.[0-9]+', value), 'invalid VERSION')
-    header = (root / 'include/crashkit.h').read_text(encoding='utf-8')
     require('#define CK_VERSION_STRING "' + value + '"' in header, 'VERSION/header mismatch')
     for field, part in zip(('MAJOR', 'MINOR', 'PATCH'), value.split('.')):
         require(re.search(r'#define CK_VERSION_' + field + r'\s+' + part + r'u\b', header),
                 'VERSION numeric macro mismatch')
     return value
+
+
+def version(root):
+    return validate_version((root / 'VERSION').read_text(encoding='utf-8').strip(),
+                            (root / 'include/crashkit.h').read_text(encoding='utf-8'))
 
 
 def package(root, output):
@@ -116,10 +119,14 @@ def unpack(archive, destination):
             files[name] = tar.extractfile(member).read()
     require('MANIFEST.json' in files, 'missing manifest')
     manifest = json.loads(files.pop('MANIFEST.json').decode('utf-8'))
+    require(isinstance(manifest, dict) and isinstance(manifest.get('version'), str)
+            and isinstance(manifest.get('files'), dict), 'invalid manifest schema')
     require(manifest.get('scope') == 'source-only' and manifest.get('format_version') == 1,
             'invalid release manifest')
     require(prefix == 'freertos-crashkit-' + manifest['version'], 'release root/version mismatch')
     require(set(manifest['files']) == set(files), 'manifest membership mismatch')
+    require(set(ROOT_FILES).issubset(files) and 'include/crashkit.h' in files
+            and 'evidence/README.md' in files, 'missing required source files')
     for name, data in files.items():
         require(manifest['files'][name] == {'size': len(data), 'sha256': hashlib.sha256(data).hexdigest()},
                 'file hash/size mismatch: ' + name)
@@ -130,13 +137,15 @@ def unpack(archive, destination):
                 (len(parts) > 1 and parts[0] in DIRECTORIES and
                  (PurePosixPath(name).suffix in SUFFIXES or parts[-1] == 'Dockerfile.rv32')),
                 'non-source payload: ' + name)
+    require(validate_version(files['VERSION'].decode('utf-8').strip(),
+                             files['include/crashkit.h'].decode('utf-8')) == manifest['version'],
+            'payload/manifest version mismatch')
     destination.mkdir(parents=True)
     for name, data in files.items():
         target = destination / name
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(data)
     (destination / 'MANIFEST.json').write_text(json.dumps(manifest, sort_keys=True, indent=2) + '\n', encoding='utf-8')
-    version(destination)
     return manifest
 
 
