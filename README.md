@@ -75,7 +75,7 @@ The source API may change in 0.x; format v1 remains explicitly versioned. See
 `include/`, `src/`: core API and encoder; `ports/`: CPU/OS integration;
 `examples/`: synthetic host demo and QEMU BSP; `tools/`: offline reader;
 `tests/`: correctness/rejection tests; `scripts/`: build and packaging;
-`docs/`: public contracts and public integration documentation.
+`docs/`: public API, format and release contracts.
 `build/`, `third_party/` and generated `evidence/` are not source deliverables.
 
 See [CONTRIBUTING](CONTRIBUTING.md), [SECURITY](SECURITY.md),

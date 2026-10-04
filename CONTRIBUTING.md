@@ -36,3 +36,8 @@ Use concise commits such as `fix(reader): reject invalid task ranges` or
 infer conventions from. Preserve MIT notices and disclose third-party code sources.
 Do not upload customer dumps, real memory images, credentials or local build trees.
 Generated demo evidence is recreated by tests and is not checked in by default.
+
+Public documents are explicitly listed in `scripts/release.py`. Keep internal
+design/planning notes outside the repository. Local collaboration files are not
+part of Git or release archives; adding public documentation requires updating
+the allowlist and reviewing its publication scope.

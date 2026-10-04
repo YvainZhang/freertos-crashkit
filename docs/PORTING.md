@@ -84,6 +84,5 @@ original ELF to `tools/analyze.py --elf`; without it the report says `not_checke
 CRC/ID equality are not authentication. Store exactly `written` bytes: trailing
 buffer padding is rejected. A compiler completion fence is not a storage barrier.
 
-For detailed Chinese reasoning see [架构与契约](PORTING.md) and
-[移植指南](PORTING.md). Real-board acceptance must independently test exception
+Real-board acceptance must independently test exception
 entry, corrupted SP, timing/budget, nested fault and storage/reset behavior.

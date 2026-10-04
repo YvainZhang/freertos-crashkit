@@ -2,8 +2,8 @@
 
 Status (2026-10-04): candidate source is public at
 [YvainZhang/freertos-crashkit](https://github.com/YvainZhang/freertos-crashkit).
-The CI permission fix `afc1aa6` passed all host GCC/Clang and RV32 jobs in
-[run 37207114947](https://github.com/YvainZhang/freertos-crashkit/actions/runs/37207114947).
+Latest host GCC/Clang and RV32 results are available in the repository's
+[Actions page](https://github.com/YvainZhang/freertos-crashkit/actions).
 An annotated version tag and formal Release have not been created. The procedure
 below distinguishes source publication from publishing release assets.
 
@@ -23,7 +23,9 @@ python3 scripts/verify-release.py build/release/freertos-crashkit-0.1.0.tar.gz
 
 Packaging uses an explicit source allowlist and fixed archive metadata. It writes
 a deterministic tar.gz, SHA256SUMS and an embedded per-file MANIFEST.json. The
-manifest is not a signature. Runtime evidence, binaries, toolchains, upstream
+manifest is not a signature. Public documents use the explicit list in
+scripts/release.py; internal plans and local collaboration files are excluded.
+Runtime evidence, binaries, toolchains, upstream
 archives, Git metadata and private knowledge-base material are excluded.
 
 The verifier checks safe member names, member types, exact manifest membership,
@@ -67,4 +69,4 @@ Update this guide's candidate status only after actual publication.
 0.1.0 closes the capture/inspect/test/distribute loop. Real-board ports, persistent
 storage, automatic task lifecycle, assert/overflow entry and precise stack unwinding
 are subsequent milestones; they are not prerequisites falsely marked complete by
-the publication work. Chinese roadmap: [验收与后续任务](RELEASING.md).
+the publication work.

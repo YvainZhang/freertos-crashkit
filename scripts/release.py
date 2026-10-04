@@ -14,8 +14,8 @@ ROOT = Path(__file__).resolve().parents[1]
 ROOT_FILES = ('LICENSE', 'VERSION', 'Makefile', 'README.md',
               'README.zh-CN.md', 'CONTRIBUTING.md', 'SECURITY.md', 'CHANGELOG.md',
               'THIRD_PARTY_NOTICES.md', '.gitignore', '.dockerignore')
-DIRECTORIES = ('include', 'src', 'ports', 'examples', 'tools', 'tests', 'scripts',
-               'docs', '.github')
+PUBLIC_DOCS = ('docs/PORTING.md', 'docs/FORMAT.md', 'docs/RELEASING.md')
+DIRECTORIES = ('include', 'src', 'ports', 'examples', 'tools', 'tests', 'scripts', '.github')
 SUFFIXES = {'.c', '.h', '.S', '.ld', '.py', '.md', '.yml', '.yaml'}
 MAX_FILE = 1024 * 1024
 MAX_TOTAL = 8 * 1024 * 1024
@@ -28,7 +28,7 @@ def require(condition, message):
 
 def payload(root):
     root = Path(root)
-    paths = [root / name for name in ROOT_FILES] + [root / 'evidence/README.md']
+    paths = [root / name for name in (*ROOT_FILES, *PUBLIC_DOCS)] + [root / 'evidence/README.md']
     for name in DIRECTORIES:
         directory = root / name
         require(directory.is_dir() and not directory.is_symlink(), 'missing/linked directory: ' + name)
@@ -125,7 +125,7 @@ def unpack(archive, destination):
             'invalid release manifest')
     require(prefix == 'freertos-crashkit-' + manifest['version'], 'release root/version mismatch')
     require(set(manifest['files']) == set(files), 'manifest membership mismatch')
-    require(set(ROOT_FILES).issubset(files) and 'include/crashkit.h' in files
+    require(set((*ROOT_FILES, *PUBLIC_DOCS)).issubset(files) and 'include/crashkit.h' in files
             and 'evidence/README.md' in files, 'missing required source files')
     for name, data in files.items():
         require(manifest['files'][name] == {'size': len(data), 'sha256': hashlib.sha256(data).hexdigest()},
@@ -133,7 +133,7 @@ def unpack(archive, destination):
     # Enforce our source-only allowlist even for a self-consistent altered manifest.
     for name in files:
         parts = PurePosixPath(name).parts
-        require(name in ROOT_FILES or name == 'evidence/README.md' or
+        require(name in ROOT_FILES or name in PUBLIC_DOCS or name == 'evidence/README.md' or
                 (len(parts) > 1 and parts[0] in DIRECTORIES and
                  (PurePosixPath(name).suffix in SUFFIXES or parts[-1] == 'Dockerfile.rv32')),
                 'non-source payload: ' + name)

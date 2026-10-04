@@ -25,8 +25,25 @@ class ReleaseTests(unittest.TestCase):
             self.assertIn('.github/workflows/ci.yml', manifest['files'])
             self.assertFalse(any(name.startswith(('build/', 'third_party/', 'evidence/qemu-rv32/'))
                                  for name in manifest['files']))
+            self.assertNotIn('AGENTS.md', manifest['files'])
+            self.assertEqual({name for name in manifest['files'] if name.startswith('docs/')},
+                             set(release.PUBLIC_DOCS))
             with self.assertRaisesRegex(ValueError, 'must not exist'):
                 release.unpack(archive, directory / 'source')
+
+    def test_local_notes_are_not_packaged(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)/'source'
+            root.mkdir()
+            for name, data in release.payload(ROOT).items():
+                target=root/name; target.parent.mkdir(parents=True,exist_ok=True)
+                target.write_bytes(data)
+            for name in ('AGENTS.md', 'PLAN.internal.md', 'docs/internal-plan.md'):
+                (root/name).write_text('# Local-only example\n',encoding='utf-8')
+            archive,_=release.package(root, Path(temporary)/'output')
+            manifest=release.unpack(archive,Path(temporary)/'extracted')
+            self.assertFalse(any(name in manifest['files'] for name in
+                                 ('AGENTS.md','PLAN.internal.md','docs/internal-plan.md')))
 
     def test_traversal_link_duplicate_and_bad_hash(self):
         for variant in ('traversal', 'link', 'duplicate', 'hash', 'schema', 'version'):

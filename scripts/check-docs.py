@@ -6,7 +6,10 @@ import re
 from urllib.parse import unquote
 
 ROOT = Path(__file__).resolve().parents[1]
-documents = sorted(ROOT.glob('*.md')) + sorted((ROOT / 'docs').rglob('*.md'))
+from release import PUBLIC_DOCS
+
+documents = sorted(p for p in ROOT.glob('*.md') if p.name != 'AGENTS.md')
+documents += [ROOT / name for name in PUBLIC_DOCS]
 documents += sorted((ROOT / '.github').rglob('*.md')) + [ROOT / 'evidence/README.md']
 errors = []
 for path in documents:

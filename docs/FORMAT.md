@@ -53,4 +53,3 @@ shapes before reporting. Incomplete snapshots are rejected, not repaired silentl
 Checksum and identity are not cryptographic authentication. `--elf` additionally
 requires a nonzero matching ID, and for RV32 an ELF32 RISC-V image (machine 243).
 Extended ELF section numbering is unsupported. `--elf` absent means `not_checked`.
-See [中文格式说明](FORMAT.md) for the corresponding local tutorial.

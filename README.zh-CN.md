@@ -32,7 +32,7 @@ python3 tools/analyze.py evidence/qemu-rv32/1.bin --elf build/rv32/1/firmware.el
 
 ## 文档与边界
 
-先读 [架构与契约](docs/PORTING.md)，再按 [移植指南](docs/PORTING.md)接入，格式见 [快照格式](docs/FORMAT.md)，结果见 [本轮交付报告](docs/RELEASING.md)，进度见 [验收与后续任务](docs/RELEASING.md)。每项功能对应架构决策、故障实验和可核验结果。
+按 [接入与API契约](docs/PORTING.md)接入，快照格式见 [FORMAT](docs/FORMAT.md)，源码包与版本发布流程见 [RELEASING](docs/RELEASING.md)。这些公开文档说明支持范围、集成要求与验证方法。
 
 当前任务记录是登记时的名称/优先级/栈区域，不声称故障时的Ready/Blocked状态或完整任务枚举。尚无完整多任务回溯、死锁定因、SMP、RV64、F/V寄存器、物理掉电持久化或真实芯片验收。QEMU输出是测试载体；板端保存接口需根据存储/看门狗/异常上下文实现。CRC用于损坏检测，不用于认证。0.x源码API允许在次版本调整，无二进制ABI承诺；快照格式独立版本化。英文API契约与兼容矩阵见 [PORTING](docs/PORTING.md)。
 
@@ -42,4 +42,4 @@ python3 tools/analyze.py evidence/qemu-rv32/1.bin --elf build/rv32/1/firmware.el
 
 ## License
 
-Original code: [MIT](LICENSE). FreeRTOS: upstream MIT, see the downloaded kernel's LICENSE.md and [依赖与资料](THIRD_PARTY_NOTICES.md). No proprietary firmware, customer dumps or vendor tool implementation is distributed.
+Original code: [MIT](LICENSE). FreeRTOS: upstream MIT, see the downloaded kernel's LICENSE.md and [第三方依赖说明](THIRD_PARTY_NOTICES.md). No proprietary firmware, customer dumps or vendor tool implementation is distributed.
