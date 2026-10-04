@@ -1,5 +1,12 @@
 # Preparing and publishing a release
 
+Status (2026-10-04): candidate source is public at
+[YvainZhang/freertos-crashkit](https://github.com/YvainZhang/freertos-crashkit).
+The CI permission fix `afc1aa6` passed all host GCC/Clang and RV32 jobs in
+[run 37207114947](https://github.com/YvainZhang/freertos-crashkit/actions/runs/37207114947).
+An annotated version tag and formal Release have not been created. The procedure
+below distinguishes source publication from publishing release assets.
+
 ## Local candidate
 
 Run from the repository root:

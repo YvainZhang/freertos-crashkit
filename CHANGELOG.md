@@ -14,4 +14,7 @@
 
 This version does not include real-board validation, persistence, full task-state
 enumeration, automatic stack unwinding or additional validated CPU ports.
-The candidate is prepared locally; remote CI/tag/publication remain separate gates.
+Candidate source is public on main; host GCC/Clang and RV32 GitHub CI have passed.
+The initial runner write-permission failure was fixed by running the build
+container as the checkout owner's UID/GID. A version tag and Release are not yet
+published; current evidence and publication state are in [RELEASING](docs/RELEASING.md).

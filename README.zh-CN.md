@@ -3,7 +3,7 @@
 An independent, portable crash-capture component with an offline evidence reader.
 Original component code; official FreeRTOS is a separately pinned dependency.
 
-独立设计的FreeRTOS故障采集组件：固定内存、明确缺失、CPU/OS/板级边界分离。第一版目标是单核通用RV32，验证平台为QEMU virt，不绑定芯片厂商，不依赖厂商故障分析工具。当前准备实验性0.1.0开源候选，未远程发布；英文入口见 [README](README.md)，发布流程见 [RELEASING](docs/RELEASING.md)。
+独立设计的FreeRTOS故障采集组件：固定内存、明确缺失、CPU/OS/板级边界分离。第一版目标是单核通用RV32，验证平台为QEMU virt，不绑定芯片厂商，不依赖厂商故障分析工具。实验性0.1.0候选源码已推送到 [公开仓库](https://github.com/YvainZhang/freertos-crashkit)，GCC/Clang与RV32远程CI已通过；正式tag和Release尚未创建。英文入口见 [README](README.md)，发布流程见 [RELEASING](docs/RELEASING.md)。
 
 ## 已实现
 
