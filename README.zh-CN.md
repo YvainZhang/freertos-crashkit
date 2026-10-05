@@ -1,9 +1,9 @@
 # FreeRTOS CrashKit
 
-An independent, portable crash-capture component with an offline evidence reader.
+An independent, portable crash-capture and post-mortem debugging toolkit.
 Original component code; official FreeRTOS is a separately pinned dependency.
 
-独立设计的FreeRTOS故障采集组件：固定内存、明确缺失、CPU/OS/板级边界分离。第一版目标是单核通用RV32，验证平台为QEMU virt，不绑定芯片厂商，不依赖厂商故障分析工具。实验性0.1.0候选源码已推送到 [公开仓库](https://github.com/YvainZhang/freertos-crashkit)，GCC/Clang与RV32远程CI已通过；正式tag和Release尚未创建。英文入口见 [README](README.md)，发布流程见 [RELEASING](docs/RELEASING.md)。
+独立设计的FreeRTOS故障采集与死后调试工具：固定预算、明确缺失、CPU/OS/板级边界分离。当前为实验性0.2.0候选，使用单核通用RV32和QEMU virt，不绑定芯片厂商。源码入口为 [公开仓库](https://github.com/YvainZhang/freertos-crashkit)，请在 [GitHub Actions](https://github.com/YvainZhang/freertos-crashkit/actions) 核对所用提交的CI结果；源码公开不等于已创建正式tag/Release。英文入口见 [README](README.md)，交互调试见 [DEBUGGING](docs/DEBUGGING.md)。
 
 ## 已实现
 
@@ -11,6 +11,9 @@ Original component code; official FreeRTOS is a separately pinned dependency.
 - 有界任务元数据登记；FreeRTOS适配使用公开API和显式静态任务登记，不修改内核。
 - RV32 M-mode异常向量、独立故障栈、通用寄存器与CSR保存、嵌套故障中止。
 - Python离线解析、固件身份匹配、JSON/HTML报告。只读解析，不在故障镜像里执行目标函数。
+- 离线任务重建、保存上下文恢复、栈剩余量和帧链；GDB支持任务切换、DWARF回溯、局部/全局变量。
+- 队列及等待者、信号量/互斥锁、事件组、流缓冲区、软件定时器、heap_4与有界事件历史。
+- 可选分析副本：写寄存器/内存、RV32虚拟执行ELF辅助函数、重置；原始快照保持不变。
 - 主机故障/容量/格式测试、ASan/UBSan；官方FreeRTOS V11.1.0在QEMU中运行并注入真实异常。
 
 ## 快速开始
@@ -25,7 +28,8 @@ python3 scripts/fetch-freertos.py
 docker build -f scripts/Dockerfile.rv32 -t freertos-crashkit-rv32:bookworm .
 docker run --rm --user "$(id -u):$(id -g)" --network none --cap-drop ALL --security-opt no-new-privileges --cpus 2 --memory 512m -v "$PWD:/work" -w /work freertos-crashkit-rv32:bookworm python3 scripts/build-rv32.py
 make qemu-test
-python3 tools/analyze.py evidence/qemu-rv32/1.bin --elf build/rv32/1/firmware.elf --json build/report.json --html build/report.html
+python3 tools/analyze.py evidence/qemu-rv32/1.bin --elf build/rv32/1/firmware.elf --debug --json build/report.json --html build/report.html
+docker run --rm --user "$(id -u):$(id -g)" --network none --cap-drop ALL --security-opt no-new-privileges --cpus 2 --memory 512m -v "$PWD:/work" -w /work freertos-crashkit-rv32:bookworm python3 scripts/test-debug.py
 ```
 
 下载工具校验锁定的官方归档；已有归档可用`--archive <path>`复用。构建不修改已有项目、容器或FreeRTOS源码。工具容器以当前用户UID/GID运行，移除capabilities后仍能写入自己拥有的挂载目录，避免Linux runner的root无权限问题。已有生成文件也需由该用户可写。工具容器只挂载本项目，无网络；不要在共享生产环境注入故障。
@@ -34,7 +38,9 @@ python3 tools/analyze.py evidence/qemu-rv32/1.bin --elf build/rv32/1/firmware.el
 
 按 [接入与API契约](docs/PORTING.md)接入，快照格式见 [FORMAT](docs/FORMAT.md)，源码包与版本发布流程见 [RELEASING](docs/RELEASING.md)。这些公开文档说明支持范围、集成要求与验证方法。
 
-当前任务记录是登记时的名称/优先级/栈区域，不声称故障时的Ready/Blocked状态或完整任务枚举。尚无完整多任务回溯、死锁定因、SMP、RV64、F/V寄存器、物理掉电持久化或真实芯片验收。QEMU输出是测试载体；板端保存接口需根据存储/看门狗/异常上下文实现。CRC用于损坏检测，不用于认证。0.x源码API允许在次版本调整，无二进制ABI承诺；快照格式独立版本化。英文API契约与兼容矩阵见 [PORTING](docs/PORTING.md)。
+Type-3任务记录仍是登记元数据；新增离线视图根据匹配ELF及冻结内核RAM重建故障时状态，损坏或缺失时明确降级。当前自动视图限FreeRTOS V11.1.0与参考RV32上下文，不支持SMP、RV64或F/V。Python回溯要求帧指针；GDB结合DWARF分析，优化掉的信息无法恢复。尚无自动死锁定因、真实芯片验收或掉电持久化。芯片寄存器使用缓存采样与用户提供的字段/时钟树配置，QEMU示例不代表厂商适配已验证。默认GDB只读，开启执行后仅修改分析副本；不得在真设备调用虚拟地址辅助函数。
+
+CPU异常（含真实定时器ISR）、assert和真实内核栈哨兵检测分别验收；中断异常视图与被中断任务的保存上下文分开。栈哨兵破坏测试不等于已覆盖所有SP失效情形。CRC用于损坏检测，不用于认证。0.x源码API允许次版本调整，格式v1保持原字段编码，0.2.0扩大了输入长度上限。接入与预算见 [PORTING](docs/PORTING.md)。
 
 ## Source layout
 

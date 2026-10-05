@@ -9,6 +9,8 @@ both welcome. No contribution implies support for an untested board.
 
 Run `make verify` and `make sanitize` from the repository root. A target-side change
 also needs the complete RV32 build and `make qemu-test` sequence in the README.
+Offline/debugger changes also need `scripts/test-debug.py` in the independent
+tool image, including actual GDB and corrupt-state cases.
 Use C11, four-space indentation in new code, fixed-width serialized fields and
 `ck_` names for public functions. Existing compact code can be reformatted in a
 separate change. No formatter configuration is enforced; compiler warnings are

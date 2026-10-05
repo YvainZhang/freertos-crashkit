@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: MIT */
 #include "crashkit.h"
+#include "crashkit_trace.h"
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -22,6 +23,12 @@ int main(void) {
     struct ck_writer w; size_t n; struct source s={0};
     for (unsigned i=0;i<sizeof(ram);i++) ram[i]=(uint8_t)i;
     assert(ck_crc32((const uint8_t *)"123456789",9)==0xcbf43926u);
+    struct ck_trace_ring ring;
+    ck_trace_init(&ring);
+    for(unsigned i=1;i<=20;i++) assert(ck_trace_write(&ring,i,3,i*7)==CK_OK);
+    assert(ring.sequence==20 && ring.entries[0].sequence==17 && ring.entries[3].sequence==20);
+    assert(ring.entries[3].state==2 && ring.entries[3].crc==ck_crc32((const uint8_t *)&ring.entries[3].sequence,16));
+    ring.sequence=UINT32_MAX;assert(ck_trace_write(&ring,0,0,0)==CK_EINVAL);
     assert(ck_begin(&w,output,63,&identity)==CK_EINVAL);
     assert(ck_begin(&w,output,sizeof(output),&identity)==CK_OK);
     assert(ck_finish(&w,&n)==CK_OK && n==64);

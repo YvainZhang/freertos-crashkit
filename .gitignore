@@ -10,3 +10,4 @@ evidence/*
 !/docs/PORTING.md
 !/docs/FORMAT.md
 !/docs/RELEASING.md
+!/docs/DEBUGGING.md

@@ -73,7 +73,7 @@ ck_nested:
     tail ck_rv32_on_nested_fault
 .size ck_rv32_vector, .-ck_rv32_vector
 
-.section .bss.ck_fault_stack,"aw",@nobits
+.section .crashkit_workspace,"aw",@nobits
 .align 4
 .global ck_rv32_fault_stack
 ck_rv32_fault_stack:

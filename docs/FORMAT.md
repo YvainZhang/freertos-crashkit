@@ -2,7 +2,9 @@
 
 All integers are explicitly little endian, regardless of source CPU byte order.
 No native C struct layout is serialized. Inputs are exactly the written length,
-64..65536 bytes, with no extra padding.
+64..4194304 bytes in 0.2.0, with no extra padding. The 0.1 reader ceiling was
+65536 bytes; it can read compatible compact snapshots but rejects larger inputs.
+No header/record encoding changed when raising this implementation limit.
 
 ## Header (48 bytes)
 
@@ -39,7 +41,10 @@ READ_FAILED; a short capture must indicate one of these. Register mask bits beyo
 count and out-of-range 32-bit values are invalid. Target address ranges cannot wrap.
 RV32 full register order is x0..x31, mepc, mstatus, mcause, mtval (36 values);
 other shapes are reported as rN. Task records describe registration-time metadata.
-Diagnostics: 1 bad/updating registry slot, 2 rejected registrations, 3 demo progress.
+Diagnostics: 1 bad/updating registry slot, 2 rejected registrations, 3 demo progress;
+reference software hooks use 4 for hook context (1 ISR/overflow, 0 task/assert),
+and 5 for assert line or overflow TCB handle. Software-hook PC is the trap inside
+the hook, not an invented original CPU exception PC.
 Unknown record types are skipped and reported; unknown flag bits are rejected.
 
 ## Footer and validation
@@ -53,3 +58,8 @@ shapes before reporting. Incomplete snapshots are rejected, not repaired silentl
 Checksum and identity are not cryptographic authentication. `--elf` additionally
 requires a nonzero matching ID, and for RV32 an ELF32 RISC-V image (machine 243).
 Extended ELF section numbering is unsupported. `--elf` absent means `not_checked`.
+
+Optional `.crashkit_layout`/`.crashkit_objects` and DWARF describe how the matched
+ELF interprets captured RAM. They are separate from v1 snapshot records. Type-3
+registration metadata must not be confused with the optional reconstructed kernel
+view; see [offline debugging](DEBUGGING.md).

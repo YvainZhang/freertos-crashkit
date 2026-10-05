@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ROOT_FILES = ('LICENSE', 'VERSION', 'Makefile', 'README.md',
               'README.zh-CN.md', 'CONTRIBUTING.md', 'SECURITY.md', 'CHANGELOG.md',
               'THIRD_PARTY_NOTICES.md', '.gitignore', '.dockerignore')
-PUBLIC_DOCS = ('docs/PORTING.md', 'docs/FORMAT.md', 'docs/RELEASING.md')
+PUBLIC_DOCS = ('docs/PORTING.md', 'docs/FORMAT.md', 'docs/RELEASING.md', 'docs/DEBUGGING.md')
 DIRECTORIES = ('include', 'src', 'ports', 'examples', 'tools', 'tests', 'scripts', '.github')
 SUFFIXES = {'.c', '.h', '.S', '.ld', '.py', '.md', '.yml', '.yaml'}
 MAX_FILE = 1024 * 1024

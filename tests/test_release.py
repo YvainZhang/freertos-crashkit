@@ -21,7 +21,7 @@ class ReleaseTests(unittest.TestCase):
             _, second = release.package(ROOT, directory)
             self.assertEqual(first, second)
             manifest = release.unpack(archive, directory / 'source')
-            self.assertEqual(manifest['version'], '0.1.0')
+            self.assertEqual(manifest['version'], '0.2.0')
             self.assertIn('.github/workflows/ci.yml', manifest['files'])
             self.assertFalse(any(name.startswith(('build/', 'third_party/', 'evidence/qemu-rv32/'))
                                  for name in manifest['files']))
@@ -56,20 +56,20 @@ class ReleaseTests(unittest.TestCase):
                     for member in members:
                         data = source.extractfile(member).read()
                         if variant == 'hash' and member.name.endswith('/VERSION'):
-                            data = b'0.2.0\n'
+                            data = b'9.9.9\n'
                             member.size = len(data)
                         if member.name.endswith('/MANIFEST.json') and variant in ('schema', 'version'):
                             manifest = json.loads(data)
                             if variant == 'schema':
                                 manifest = []
                             else:
-                                manifest['version'] = '0.2.0'
+                                manifest['version'] = '9.9.9'
                             data = json.dumps(manifest).encode('utf-8')
                             member.size = len(data)
                         output.addfile(member, io.BytesIO(data))
-                    entry = tarfile.TarInfo('freertos-crashkit-0.1.0/../../escaped')
+                    entry = tarfile.TarInfo('freertos-crashkit-0.2.0/../../escaped')
                     if variant == 'link':
-                        entry.name = 'freertos-crashkit-0.1.0/linked'
+                        entry.name = 'freertos-crashkit-0.2.0/linked'
                         entry.type = tarfile.SYMTYPE
                         entry.linkname = '/etc/passwd'
                     if variant == 'duplicate':

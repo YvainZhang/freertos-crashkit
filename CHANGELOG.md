@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.2.0 — experimental development candidate
+
+- Add UART/raw-RAM import, kernel-layout task reconstruction and RV32 saved
+  contexts, bounded frame-chain unwind, symbols and optional source locations.
+- Add loopback GDB server, task threads, DWARF inspection, writable analysis copy,
+  original RV32 virtual execution, scratch stack and ELF-only helper calls/reset.
+- Add DWARF-derived object plugins for queues/waiters, semaphores/mutexes,
+  event groups, streams, timers and heap_4; bounded event history and register/clock profiles.
+- Capture selected application/kernel RAM and IRQ stack, with separate assert
+  and real kernel stack-canary-hook cases, with separate IRQ/task context attribution
+  and a real timer-ISR fault scenario.
+- Raise the v1 parser/core size ceiling to 4MiB; reference dump capacity stays
+  64KiB. Encoding is unchanged; 0.1 readers still reject inputs over 64KiB.
+- Add actual-GDB and damaged-state acceptance plus CI configuration. Check
+  GitHub Actions for the exact commit's result; a tagged Release is separate.
+
 ## 0.1.0 — initial experimental release candidate
 
 - Original bounded C11 encoder and task registry; format v1 with explicit field

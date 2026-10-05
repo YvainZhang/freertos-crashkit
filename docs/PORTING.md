@@ -2,7 +2,7 @@
 
 ## Compatibility policy
 
-0.1.0 supports source integration of the C11 core; it makes no binary ABI promise.
+0.2.0 supports source integration of the C11 core; it makes no binary ABI promise.
 Public structs are caller-owned: initialize through the API and do not mutate writer
 internals. A 0.x minor release may change source APIs with a changelog entry; patch
 releases should not intentionally break them. Snapshot format v1 is independent
@@ -12,9 +12,9 @@ Unknown v1 record types are reported without interpreting their payload.
 | Configuration | Validation |
 | --- | --- |
 | Host core/reader, generic 32/64 fields, endian tags | Unit tests; no CPU exception port implied |
-| Single-hart RV32IMAC+Zicsr/Zifencei, ILP32, M-mode, QEMU virt, FreeRTOS V11.1.0 | Four injected fault cases |
+| Single-hart RV32IMAC+Zicsr/Zifencei, ILP32, M-mode, QEMU virt, FreeRTOS V11.1.0 | CPU/nested/assert/stack-canary cases; offline/GDB acceptance |
 | Physical RV32 SoC, reset/power-loss storage | Not validated |
-| Cortex-M, RV64, SMP, FPU/vector state, other FreeRTOS versions | Not supported/validated in 0.1.0 |
+| Cortex-M, RV64, SMP, FPU/vector state, other FreeRTOS versions | Not supported/validated in 0.2.0 |
 
 ## Integrating the core
 
@@ -24,7 +24,7 @@ stack use; an optimization can lower loops to libc calls. The reference embedded
 build uses `-ffreestanding -fno-builtin` and explicitly accounts for libgcc.
 
 Allocate the writer, dump buffer and registry before any fault. Keep them in RAM
-accessible after the supported fault. Buffers are 64..65536 bytes. Reserve capacity
+accessible after the supported fault. Buffers are 64..4194304 bytes. Reserve capacity
 for the 48-byte header, 16-byte footer and each record's 12-byte header. `ck_begin`
 clears the entire buffer, so clearing and CRC work belong in the time budget.
 
@@ -64,8 +64,27 @@ after creating each static task, call `ck_freertos_track_static` before its firs
 execution (for example before starting the scheduler). Preserve the stack's full
 allocation range and a nonzero generation. Untrack in normal context **before**
 deleting/reusing task resources. Do not use these critical-section APIs in a fault
-or ISR. Dynamic tasks, idle task enumeration and automatic priority/name updates
-are intentionally not implemented.
+or ISR. This registry adapter does not automatically track dynamic tasks or
+priority/name updates. The separate offline view discovers static/dynamic/idle
+and timer tasks from captured kernel RAM with an exact-ELF layout contract.
+
+Opt in with `configINCLUDE_FREERTOS_TASK_C_ADDITIONS_H=1`, stack-end recording and
+the supplied `ports/freertos/freertos_tasks_c_additions.h`. It emits compile-time
+layout metadata and ELF-only helpers; no custom kernel patch is needed. This
+private-layout view is pinned to the supported kernel/configuration/context port,
+unlike the public-API registry. Preserve DWARF types and full relevant RAM; missing
+TCBs/lists/stacks are explicit unknowns. See [DEBUGGING](DEBUGGING.md).
+
+The reference assert/overflow hooks trigger a software breakpoint after setting
+reason/detail. Their PC/registers describe the hook entry, not a pre-hook hardware
+fault. The actual kernel stack-canary check runs on the IRQ stack; offline analysis
+separates that exception context from the task's saved port context. A broken
+task SP can fail before a C hook is reached and needs its own exception-entry test.
+
+For optional normal-context event history compile `src/crashkit_trace.c` and
+include `crashkit_trace.h`. Serialize producers, supply tick units/tags, and keep
+the ring in captured RAM. Entries commit last with CRC; overwrite/partial-update
+status is reported. The reference raw-RAM interpretation is RV32 little endian.
 
 ## BSP and artifact identity
 

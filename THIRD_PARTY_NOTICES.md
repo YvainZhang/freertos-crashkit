@@ -10,17 +10,18 @@ describes compatibility with FreeRTOS and does not imply upstream affiliation.
 - Archive SHA-256: `0e21928b3bcc4f9bcaf7333fb1c8c0299d97e2ec9e13e3faa2c5a7ac8a3bc573`.
 - License: [upstream MIT notice](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.1.0/LICENSE.md),
   preserved at `third_party/FreeRTOS-Kernel-11.1.0/LICENSE.md` after fetching.
-- The example links official `tasks.c`, `list.c`, `queue.c` and GCC RISC-V port
+- The example links official `tasks.c`, `list.c`, `queue.c`, `event_groups.c`,
+  `stream_buffer.c`, `timers.c`, `heap_4.c` and GCC RISC-V port
   files without modifying them. Preserve their notices when redistributing them.
 
 ## Build and test tools (not bundled)
 
 Docker uses Debian bookworm-slim pinned by image digest. Its apt repositories are
 not historical snapshots. The image installs `build-essential`, `python3`,
-`gcc-riscv64-unknown-elf` and `binutils-riscv64-unknown-elf`; host QEMU comes from
+`gcc-riscv64-unknown-elf`, `binutils-riscv64-unknown-elf` and `gdb-multiarch`; host QEMU comes from
 the user's installation or the CI runner's `qemu-system-misc` package.
 
-GCC/binutils/QEMU and Python carry their respective upstream licenses. The example
+GCC/binutils/GDB/QEMU and Python carry their respective upstream licenses. The example
 links libgcc compiler runtime helpers; GCC's runtime is governed by GPL with the
 [GCC Runtime Library Exception](https://www.gnu.org/licenses/gcc-exception-3.1.html).
 Source releases do not bundle tool binaries, container images, upstream kernel

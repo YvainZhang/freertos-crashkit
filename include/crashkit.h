@@ -5,13 +5,13 @@
 #include <stdint.h>
 
 #define CK_VERSION_MAJOR 0u
-#define CK_VERSION_MINOR 1u
+#define CK_VERSION_MINOR 2u
 #define CK_VERSION_PATCH 0u
-#define CK_VERSION_STRING "0.1.0"
+#define CK_VERSION_STRING "0.2.0"
 #define CK_FORMAT_VERSION 1u
 #define CK_HEADER_SIZE 48u
 #define CK_FOOTER_SIZE 16u
-#define CK_MAX_DUMP_BYTES 65536u
+#define CK_MAX_DUMP_BYTES 4194304u
 #define CK_MAX_REGISTERS 40u
 #define CK_MAX_REGION_BYTES 1024u
 #define CK_MAX_TASKS 16u

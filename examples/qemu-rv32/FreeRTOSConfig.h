@@ -14,15 +14,25 @@ void ck_example_assert(unsigned line);
 #define configMAX_TASK_NAME_LEN 16
 #define configUSE_16_BIT_TICKS 0
 #define configUSE_IDLE_HOOK 0
-#define configUSE_TICK_HOOK 0
-#define configUSE_MUTEXES 0
-#define configUSE_TIMERS 0
+#define configUSE_TICK_HOOK 1
+#define configUSE_MUTEXES 1
+#define configUSE_COUNTING_SEMAPHORES 1
+#define configUSE_TIMERS 1
+#define configTIMER_TASK_PRIORITY 1
+#define configTIMER_QUEUE_LENGTH 8
+#define configTIMER_TASK_STACK_DEPTH 512
+#define configTOTAL_HEAP_SIZE 16384
 #define configSUPPORT_STATIC_ALLOCATION 1
-#define configSUPPORT_DYNAMIC_ALLOCATION 0
-#define configUSE_TRACE_FACILITY 0
+#define configSUPPORT_DYNAMIC_ALLOCATION 1
+#define configUSE_TRACE_FACILITY 1
+#define configRECORD_STACK_HIGH_ADDRESS 1
+#define configINCLUDE_FREERTOS_TASK_C_ADDITIONS_H 1
 #define configGENERATE_RUN_TIME_STATS 0
-#define configCHECK_FOR_STACK_OVERFLOW 0
+#define configCHECK_FOR_STACK_OVERFLOW 2
 #define INCLUDE_vTaskDelay 1
 #define INCLUDE_vTaskDelete 1
+#define INCLUDE_vTaskSuspend 1
+#define INCLUDE_xTaskGetCurrentTaskHandle 1
+#define INCLUDE_xSemaphoreGetMutexHolder 1
 #define configASSERT(x) do { if (!(x)) ck_example_assert(__LINE__); } while (0)
 #endif

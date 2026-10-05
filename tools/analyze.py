@@ -7,9 +7,10 @@ import html
 import json
 from pathlib import Path
 import struct
+import subprocess
 import zlib
 
-MAX_DUMP = 65536
+MAX_DUMP = 4194304
 
 def crc(data):
     return zlib.crc32(data) & 0xffffffff
@@ -120,8 +121,12 @@ def main():
     ap.add_argument('--elf', type=Path)
     ap.add_argument('--json', type=Path)
     ap.add_argument('--html', type=Path)
+    ap.add_argument('--debug', action='store_true', help='reconstruct tasks and frame chains with matched RV32 ELF')
+    ap.add_argument('--addr2line', help='optional target addr2line executable for source locations')
+    ap.add_argument('--register-profile', type=Path, help='board register/clock JSON profile (requires --debug)')
     args = ap.parse_args()
     try:
+        require(not args.addr2line or args.debug, '--addr2line requires --debug')
         require(args.dump.stat().st_size <= MAX_DUMP, 'dump exceeds input limit')
         result = parse(args.dump.read_bytes())
         if args.elf:
@@ -131,13 +136,22 @@ def main():
             if result['architecture'] == 'rv32':
                 require(identity['elf_class'] == 1 and identity['elf_machine'] == 243, 'ELF target mismatch')
             result.update(identity, matching='firmware_id_matched')
+        if args.debug:
+            require(args.elf is not None, '--debug requires --elf')
+            from postmortem import Snapshot
+            result['analysis'] = Snapshot(result,args.elf).summary(args.addr2line)
+            result['scope'] = 'Snapshot records plus separately reconstructed kernel/object evidence; no automatic root cause.'
+        if args.register_profile:
+            require(args.debug and args.register_profile.stat().st_size <= 65536,'register profile requires --debug and <=64KiB')
+            from registers import decode_profile
+            result['analysis']['hardware'] = decode_profile(result['analysis']['objects'],json.loads(args.register_profile.read_text()))
         text = json.dumps(result, ensure_ascii=False, indent=2)+'\n'
         if args.json: args.json.write_text(text,encoding='utf-8')
         if args.html:
             args.html.write_text('<!doctype html><meta charset="utf-8"><title>CrashKit report</title>'
                                  '<h1>CrashKit evidence report</h1><pre>'+html.escape(text)+'</pre>',encoding='utf-8')
         if not args.json: print(text,end='')
-    except (ValueError, OSError, struct.error) as error:
+    except (ValueError, OSError, struct.error, subprocess.TimeoutExpired) as error:
         ap.exit(2, 'Rejected: '+str(error)+'\n')
 
 if __name__ == '__main__':

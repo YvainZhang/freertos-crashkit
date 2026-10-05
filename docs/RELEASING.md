@@ -1,11 +1,15 @@
 # Preparing and publishing a release
 
-Status (2026-10-04): candidate source is public at
+Status (2026-10-05): the source repository is public at
 [YvainZhang/freertos-crashkit](https://github.com/YvainZhang/freertos-crashkit).
-Latest host GCC/Clang and RV32 results are available in the repository's
-[Actions page](https://github.com/YvainZhang/freertos-crashkit/actions).
+Check host GCC/Clang and RV32 results for the exact candidate commit on the
+repository's [Actions page](https://github.com/YvainZhang/freertos-crashkit/actions).
 An annotated version tag and formal Release have not been created. The procedure
 below distinguishes source publication from publishing release assets.
+
+0.2.0 is an experimental development candidate with expanded diagnostics/GDB
+changes. Older Actions results must not be presented as evidence for this revision;
+require successful checks on the commit being published.
 
 ## Local candidate
 
@@ -17,8 +21,9 @@ make sanitize
 python3 scripts/fetch-freertos.py
 # Build all RV32 cases using the README's Docker command (or make rv32-build).
 make qemu-test
+# Run scripts/test-debug.py in the independent RV32/GDB tool image.
 make package
-python3 scripts/verify-release.py build/release/freertos-crashkit-0.1.0.tar.gz
+python3 scripts/verify-release.py build/release/freertos-crashkit-0.2.0.tar.gz
 ```
 
 Packaging uses an explicit source allowlist and fixed archive metadata. It writes
@@ -59,14 +64,14 @@ and needs runner v2.327.1+ if adapted to self-hosting, per its [official README]
 CI configuration supplied locally is not remote CI evidence.
 
 Then check changelog/version, third-party notices, the real repository's reporting
-channel and issue templates. Create an annotated `v0.1.0` tag for the tested commit;
+channel and issue templates. Create an annotated tag matching VERSION for the tested commit;
 attach the verified source archive and SHA256SUMS, label the release experimental,
 and repeat the support matrix and known gaps. Git tags are not automatically signed.
 Update this guide's candidate status only after actual publication.
 
-## Initial scope
+## Candidate scope
 
-0.1.0 closes the capture/inspect/test/distribute loop. Real-board ports, persistent
-storage, automatic task lifecycle, assert/overflow entry and precise stack unwinding
-are subsequent milestones; they are not prerequisites falsely marked complete by
-the publication work.
+0.2.0 expands capture/inspect into frozen task/object analysis, GDB inspection and
+bounded virtual helpers, with assert/stack-canary cases. Real-board ports, durable
+storage, other kernel/context profiles, additional validated CPUs and SoC-specific
+register decoders remain separate validation work. See [DEBUGGING](DEBUGGING.md).
